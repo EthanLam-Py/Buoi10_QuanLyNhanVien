@@ -11,15 +11,7 @@ function NhanVien(taiKhoan, hoTen, email, matKhau, ngayLam, luongCB, chucVu, gio
     this.xepLoai = xepLoai;
 }
 
-var nv1 = new NhanVien('1001','Nguyen Van A','nguyenvanA@gmail.com','123','02/01/2021',6000000,'Nhân viên',190);
-var nv2 = new NhanVien('1002','Nguyen Van B','nguyenvanB@gmail.com','123','02/02/2021',10000000,'Trưởng phòng',170);
-var nv3 = new NhanVien('1003','Nguyen Van C','nguyenvanC@gmail.com','123','02/03/2021',15000000,'Sếp',140);
-
-DSNV = [nv1,nv2,nv3];
-
-document
-.getElementById('btnInDSNV')
-.addEventListener('click', InDSNV);
+DSNV = [];
 
 function InDSNV(dsnv) {
     dsnv = DSNV || null;
@@ -41,7 +33,12 @@ function InDSNV(dsnv) {
             <td> ${nv.chucVu}</td>
             <td> ${nv.tongLuong}</td>
             <td> ${nv.xepLoai}</td>
-            <td> <button class = 'btn btn-danger' data-taiKhoan='${nv.taiKhoan}'>Xóa</button></td>
+            <td> 
+            <button class = 'btn btn-danger' data-taiKhoan='${nv.taiKhoan}' data-action = 'xoa'>Xóa</button>
+
+             <button class = 'btn btn-success' data-taiKhoan='${nv.taiKhoan}' data-action = 'capNhat' data-toggle='modal' data-target="#myModal">Cập Nhật</button>
+
+             </td>
         </tbody>
         `
 
@@ -64,7 +61,6 @@ function themNhanVien(){
     var luongCB = document.getElementById('luongCB').value;
     luongCB = parseInt(luongCB);
     var chucVu = document.getElementById('chucvu').value;
-    console.log(chucVu);
     var gioLam = document.getElementById('gioLam').value; 
     gioLam = parseInt(gioLam);
 
@@ -85,10 +81,12 @@ function themNhanVien(){
         return;
     }
 
+
     DSNV.push(nv);
     InDSNV(DSNV)
 
     document.getElementById('myform').reset();
+    document.getElementById('btnDong').click();
 }
 
 // Câu 5
@@ -117,7 +115,6 @@ function validator(action ,nv){
         var isValid = validator.isRequired("tbTKNV",nv.taiKhoan) && validator.taiKhoan("tbTKNV", nv.taiKhoan) && validator.taiKhoanKhongTonTai("tbTKNV", nv.taiKhoan, DSNV);
     };
 
-
     isValid &= validator.isRequired("tbTen",nv.hoTen) && validator.hoTen("tbTen", nv.hoTen);
 
     isValid &= validator.isRequired("tbEmail",nv.email) && validator.email('tbEmail', nv.email);
@@ -135,7 +132,7 @@ function validator(action ,nv){
     if(!isValid){
         for (var key in validator.errors){
             if(validator.errors[key]){
-                var span_thongbao= document.getElementById(key)
+                var span_thongbao = document.getElementById(key)
                 span_thongbao.innerHTML = validator.errors[key];
                 span_thongbao.style.display = 'block';
             }
@@ -148,31 +145,58 @@ function validator(action ,nv){
 // Câu 7
 document
 .getElementById('tableDanhSach')
-.addEventListener('click', xoaNhanVien);
+.addEventListener('click', delegation);
 
-function xoaNhanVien(event){
+function delegation(event){
     var taiKhoan = event.target.getAttribute('data-taiKhoan');
-    DSNV = DSNV.filter(function(nv){
-        return nv.taiKhoan !== taiKhoan;
-    });
+    var action = event.target.getAttribute('data-action');
 
-    InDSNV(DSNV)
+    if (action === 'xoa'){
+        xoaNhanVien(taiKhoan);
+    };
+
+    if (action === 'capNhat'){
+        var nhanvien = timNVTheoTaiKhoan(taiKhoan)[0];
+        selectNV(nhanvien);
+    }
+
 }
 
 // Câu 8
+function selectNV(nhanvien){
+    console.log(nhanvien);
+    document.getElementById('tknv').value = nhanvien.taiKhoan;
+    document.getElementById('name').value = nhanvien.hoTen;
+    document.getElementById('email').value = nhanvien.email;
+    document.getElementById('password').value = nhanvien.matKhau;
+    document.getElementById('datepicker').value = nhanvien.ngayLam;
+    document.getElementById('luongCB').value = nhanvien.luongCB;
+    document.getElementById('chucvu').value = nhanvien.chucVu;
+    document.getElementById('gioLam').value = nhanvien.gioLam; 
+
+    var taiKhoan = document.getElementById('tknv').style.pointerEvents= 'none';
+    taiKhoan = document.getElementById('tknv').style.background= 'gray';
+
+    document
+    .getElementById('btnCapNhat')
+    .removeAttribute('data-dismiss', 'modal')
+}
+
 document
 .getElementById('btnCapNhat')
 .addEventListener('click', capNhatNV);
 
-function capNhatNV(){
+function capNhatNV(nhanvien){
     var taiKhoan = document.getElementById('tknv').value;
     var hoTen = document.getElementById('name').value;
     var email = document.getElementById('email').value;
     var matKhau = document.getElementById('password').value;
     var ngayLam = document.getElementById('datepicker').value;
     var luongCB = document.getElementById('luongCB').value;
+    luongCB = parseInt(luongCB);
     var chucVu = document.getElementById('chucvu').value;
     var gioLam = document.getElementById('gioLam').value; 
+    gioLam = parseInt(gioLam);
 
     var nhanvien = new NhanVien(
         taiKhoan, 
@@ -190,6 +214,10 @@ function capNhatNV(){
         return;
     }
 
+    document
+    .getElementById('btnCapNhat')
+    .setAttribute('data-dismiss', 'modal')
+
     var taiKhoan = document.getElementById('tknv').value;
     
     var nhanvien = DSNV.find(function(NV){
@@ -206,18 +234,16 @@ function capNhatNV(){
 
     InDSNV(DSNV)
 
-    document.getElementById('myform').reset();
+
 }
 
 document
 .getElementById('btnTimNV')
-.addEventListener('click', timNV)
+.addEventListener('click', timNVTheoXepLoai)
 
-function timNV() {
+function timNVTheoXepLoai() {
     var search = document.getElementById('searchName').value;
     var searchValue = search.trim().toLowerCase();
-
-    
 
     var newDSNV = DSNV.filter(function(nv){
         var xepLoaiNV= nv.xepLoai.trim().toLowerCase();
@@ -226,4 +252,18 @@ function timNV() {
 
     InDSNV(newDSNV);
 }
+function timNVTheoTaiKhoan(taiKhoan) {
+    var nhanvien = DSNV.filter(function(nv){
+        return nv.taiKhoan.indexOf(taiKhoan) !== -1;
+    })
+    return nhanvien
+}
 
+
+function xoaNhanVien(taiKhoan){
+    DSNV = DSNV.filter(function(nv){
+        return nv.taiKhoan !== taiKhoan;
+    });
+    
+    InDSNV(DSNV)
+}

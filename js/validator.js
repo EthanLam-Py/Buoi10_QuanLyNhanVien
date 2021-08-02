@@ -56,7 +56,6 @@ Validator.prototype.taiKhoanKhongTonTai = function(name, taiKhoan, DSNV){
     for(nhanVien of DSNV){
         if(nhanVien.taiKhoan === taiKhoan){
             document.getElementById(name).style.display = 'none';
-            console.log('no ok');
             return true;
         }
     }
